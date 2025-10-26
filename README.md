@@ -424,7 +424,7 @@ Contributions are welcome! Please:
 
 ## Team
 
-- **[Your Name]** - Lead Developer - [GitHub](https://github.com/yourusername)
+- **[Ken Nguyen]** - Lead Developer - [GitHub](https://github.com/KnNguyen0)
 - *Add your team members here*
 
 ## Support
