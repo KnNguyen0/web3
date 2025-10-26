@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gacha Game Test (No MetaMask)</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .main-wrapper {
+            display: flex;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+        .sidebar h3 {
+            margin-top: 0;
+            text-align: center;
+            font-size: 1.3em;
+            margin-bottom: 20px;
+        }
+        .rarity-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .rarity-item.legendary { border-color: #ff9800; }
+        .rarity-item.epic { border-color: #9c27b0; }
+        .rarity-item.rare { border-color: #4caf50; }
+        .rarity-item.common { border-color: #9e9e9e; }
+        .rarity-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .rarity-chance {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .rarity-power {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        .container {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .character {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 10px;
+            border-top: 4px solid;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .character:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        }
+        .char-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .char-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2), transparent);
+        }
+        .char-info {
+            width: 100%;
+        }
+        .char-name {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .char-lore {
+            font-style: italic;
+            font-size: 0.75em;
+            opacity: 0.8;
+            margin: 8px 0;
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+        .char-stats {
+            font-size: 0.85em;
+            margin: 5px 0;
+        }
+        .char-rarity {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        .char-rarity.LEGENDARY {
+            background: rgba(255, 152, 0, 0.3);
+            color: #ffb74d;
+            border: 1px solid #ff9800;
+        }
+        .char-rarity.EPIC {
+            background: rgba(156, 39, 176, 0.3);
+            color: #ce93d8;
+            border: 1px solid #9c27b0;
+        }
+        .char-rarity.RARE {
+            background: rgba(76, 175, 80, 0.3);
+            color: #a5d6a7;
+            border: 1px solid #4caf50;
+        }
+        .char-rarity.COMMON {
+            background: rgba(158, 158, 158, 0.3);
+            color: #e0e0e0;
+            border: 1px solid #9e9e9e;
+        }
+        .char-meta {
+            font-size: 0.7em;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+        .COMMON { border-color: #9e9e9e; }
+        .RARE { border-color: #4caf50; }
+        .EPIC { border-color: #9c27b0; }
+        .LEGENDARY { border-color: #ff9800; }
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        @media (max-width: 1100px) {
+            .main-wrapper {
+                flex-direction: column;
+            }
+            .sidebar {
+                position: relative;
+                width: 100%;
+                top: 0;
+            }
+        }
+        @media (max-width: 768px) {
+            .characters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+        @media (max-width: 500px) {
+            .characters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-wrapper">
+        <!-- Sidebar with rarity info -->
+        <div class="sidebar">
+            <h3>📊 Drop Rates</h3>
+
+            <div class="rarity-item legendary">
+                <div class="rarity-name" style="color: #ff9800;">⭐ LEGENDARY</div>
+                <div class="rarity-chance">1%</div>
+                <div class="rarity-power">Power: 800-1000</div>
+            </div>
+
+            <div class="rarity-item epic">
+                <div class="rarity-name" style="color: #9c27b0;">💎 EPIC</div>
+                <div class="rarity-chance">5%</div>
+                <div class="rarity-power">Power: 500-800</div>
+            </div>
+
+            <div class="rarity-item rare">
+                <div class="rarity-name" style="color: #4caf50;">🌟 RARE</div>
+                <div class="rarity-chance">20%</div>
+                <div class="rarity-power">Power: 200-500</div>
+            </div>
+
+            <div class="rarity-item common">
+                <div class="rarity-name" style="color: #9e9e9e;">⚪ COMMON</div>
+                <div class="rarity-chance">74%</div>
+                <div class="rarity-power">Power: 50-200</div>
+            </div>
+
+            <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <h4 style="margin-top: 0; font-size: 1em;">Character Types</h4>
+                <p style="font-size: 0.85em; line-height: 1.6; opacity: 0.9;">
+                    • Shadow 🌑<br>
+                    • Fire 🔥<br>
+                    • Ice ❄️<br>
+                    • Thunder ⚡
+                </p>
+                <p style="font-size: 0.85em; line-height: 1.6; opacity: 0.9; margin-top: 10px;">
+                    • Warrior ⚔️<br>
+                    • Mage 🔮<br>
+                    • Assassin 🗡️<br>
+                    • Knight 🛡️
+                </p>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <div class="container">
+            <h1>🎰 Web3 Gacha Game Test</h1>
+            <p style="text-align: center;">Testing without MetaMask (Direct Connection)</p>
+
+            <div class="info">
+                <p><strong>Contract:</strong> <span id="contractAddress">Loading...</span></p>
+                <p><strong>Account:</strong> <span id="accountAddress">Loading...</span></p>
+                <p><strong>Balance:</strong> <span id="balance">Loading...</span></p>
+                <p><strong>Roll Price:</strong> <span id="rollPrice">Loading...</span></p>
+            </div>
+
+            <button id="rollButton" onclick="rollGacha()" disabled>Roll Gacha</button>
+            <div id="loading" class="loading" style="display: none;">🎲 Rolling...</div>
+
+            <h2>Your Characters (<span id="charCount">0</span>)</h2>
+            <div id="characters"></div>
+        </div>
+    </div>
+
+    <script>
+        const CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+        const PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+        const RPC_URL = "http://127.0.0.1:8545";
+
+        const ABI = [
+            "function roll() payable returns (uint256)",
+            "function rollPrice() view returns (uint256)",
+            "function getUserCharacters(address) view returns (uint256[])",
+            "function getCharacter(uint256) view returns (tuple(uint256 id, uint8 rarity, uint256 power, string name, uint256 rolledAt))",
+            "function getRarityName(uint8) view returns (string)",
+            "function getTotalCharacters() view returns (uint256)"
+        ];
+
+        let provider, wallet, contract;
+
+        async function init() {
+            try {
+                provider = new ethers.providers.JsonRpcProvider(RPC_URL);
+                wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, wallet);
+
+                document.getElementById('contractAddress').textContent = CONTRACT_ADDRESS;
+                document.getElementById('accountAddress').textContent = wallet.address;
+
+                const balance = await wallet.getBalance();
+                document.getElementById('balance').textContent = ethers.utils.formatEther(balance) + ' ETH';
+
+                const rollPrice = await contract.rollPrice();
+                document.getElementById('rollPrice').textContent = ethers.utils.formatEther(rollPrice) + ' ETH';
+
+                await loadCharacters();
+
+                document.getElementById('rollButton').disabled = false;
+            } catch (error) {
+                console.error('Init error:', error);
+                alert('Error connecting to blockchain: ' + error.message);
+            }
+        }
+
+        // Get character visual representation
+        function getCharacterVisual(name) {
+            const visualDB = {
+                "Shadow Warrior": { emoji: "⚔️", bg: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)", color: "#9d4edd" },
+                "Shadow Mage": { emoji: "🔮", bg: "linear-gradient(135deg, #0f0f23 0%, #240046 100%)", color: "#c77dff" },
+                "Shadow Assassin": { emoji: "🗡️", bg: "linear-gradient(135deg, #000000 0%, #434343 100%)", color: "#e0aaff" },
+                "Shadow Knight": { emoji: "🛡️", bg: "linear-gradient(135deg, #2b2d42 0%, #8d99ae 100%)", color: "#b8b8ff" },
+                "Fire Warrior": { emoji: "🔥", bg: "linear-gradient(135deg, #ff4500 0%, #ff6347 100%)", color: "#fff3b0" },
+                "Fire Mage": { emoji: "🌋", bg: "linear-gradient(135deg, #d62828 0%, #f77f00 100%)", color: "#ffedd8" },
+                "Fire Assassin": { emoji: "💥", bg: "linear-gradient(135deg, #b5179e 0%, #f72585 100%)", color: "#ffd6a5" },
+                "Fire Knight": { emoji: "🏰", bg: "linear-gradient(135deg, #fb5607 0%, #ff006e 100%)", color: "#ffafcc" },
+                "Ice Warrior": { emoji: "❄️", bg: "linear-gradient(135deg, #00b4d8 0%, #0077b6 100%)", color: "#caf0f8" },
+                "Ice Mage": { emoji: "🧊", bg: "linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%)", color: "#e0f4ff" },
+                "Ice Assassin": { emoji: "⛸️", bg: "linear-gradient(135deg, #03045e 0%, #023e8a 100%)", color: "#d0f4ff" },
+                "Ice Knight": { emoji: "🏔️", bg: "linear-gradient(135deg, #48cae4 0%, #00b4d8 100%)", color: "#f0f8ff" },
+                "Thunder Warrior": { emoji: "⚡", bg: "linear-gradient(135deg, #ffd60a 0%, #fca311 100%)", color: "#003566" },
+                "Thunder Mage": { emoji: "🌩️", bg: "linear-gradient(135deg, #7209b7 0%, #560bad 100%)", color: "#f8f9fa" },
+                "Thunder Assassin": { emoji: "⛈️", bg: "linear-gradient(135deg, #4cc9f0 0%, #4361ee 100%)", color: "#fff" },
+                "Thunder Knight": { emoji: "🌪️", bg: "linear-gradient(135deg, #3a0ca3 0%, #7209b7 100%)", color: "#e9ecef" }
+            };
+
+            const baseName = name.replace(/^(Legendary |Epic |Rare )/i, '');
+            return visualDB[baseName] || { emoji: "⭐", bg: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "#fff" };
+        }
+
+        // Character lore database
+        function getCharacterLore(name, rarity) {
+            const loreDB = {
+                "Shadow Warrior": "A fierce warrior who commands the darkness. Born in the shadow realm, they strike from the unseen.",
+                "Shadow Mage": "Master of shadow magic, bending darkness to their will. Their spells drain the light from their enemies.",
+                "Shadow Assassin": "Silent as night, deadly as death. No target has ever escaped their shadow blades.",
+                "Shadow Knight": "Defender of the dark realm, wielding shadow-forged armor impervious to light magic.",
+                "Fire Warrior": "Blazing champion of the eternal flame. Their sword burns with an unquenchable fire.",
+                "Fire Mage": "Pyromancer supreme, capable of summoning meteors from the sky and infernos from the earth.",
+                "Fire Assassin": "Leaves nothing but ashes in their wake. Their touch ignites fear in the hearts of kings.",
+                "Fire Knight": "Guardian of the sacred flames, their armor radiates heat that melts steel.",
+                "Ice Warrior": "Frozen warlord from the northern wastes. Their blade brings eternal winter.",
+                "Ice Mage": "Cryomancer who can freeze time itself. Their magic turns battlefields into frozen wastelands.",
+                "Ice Assassin": "Cold-blooded killer whose frozen heart knows no mercy. They leave frozen corpses in their path.",
+                "Ice Knight": "Protector of the frost kingdom, encased in armor of eternal ice.",
+                "Thunder Warrior": "Stormborn champion wielding lightning as their weapon. Thunder follows their every strike.",
+                "Thunder Mage": "Storm caller who commands the very sky. Their lightning never misses its mark.",
+                "Thunder Assassin": "Swift as lightning, loud as thunder. They vanish before the echo fades.",
+                "Thunder Knight": "Defender blessed by the storm gods, their armor crackles with electric fury."
+            };
+
+            // Remove rarity prefix to get base name
+            const baseName = name.replace(/^(Legendary |Epic |Rare )/i, '');
+            const lore = loreDB[baseName] || "A mysterious hero whose legend has yet to be written.";
+
+            const rarityLore = {
+                "LEGENDARY": " Their name is spoken in hushed whispers across all realms.",
+                "EPIC": " Tales of their deeds are sung by bards throughout the land.",
+                "RARE": " Their skill is recognized by warriors far and wide.",
+                "COMMON": " They begin their journey toward greatness."
+            };
+
+            return lore + (rarityLore[rarity] || "");
+        }
+
+        function getRarityColor(rarity) {
+            const colors = {
+                'COMMON': '#9e9e9e',
+                'RARE': '#4caf50',
+                'EPIC': '#9c27b0',
+                'LEGENDARY': '#ff9800'
+            };
+            return colors[rarity] || '#fff';
+        }
+
+        async function loadCharacters() {
+            try {
+                const tokenIds = await contract.getUserCharacters(wallet.address);
+                document.getElementById('charCount').textContent = tokenIds.length;
+
+                const charactersDiv = document.getElementById('characters');
+                charactersDiv.innerHTML = '';
+
+                if (tokenIds.length === 0) {
+                    charactersDiv.innerHTML = '<p style="text-align: center; opacity: 0.7;">No characters yet. Roll to get started!</p>';
+                    return;
+                }
+
+                // Create grid container
+                const gridContainer = document.createElement('div');
+                gridContainer.className = 'characters-grid';
+
+                for (let i = tokenIds.length - 1; i >= 0; i--) {
+                    const char = await contract.getCharacter(tokenIds[i]);
+                    const rarityName = await contract.getRarityName(char.rarity);
+                    const lore = getCharacterLore(char.name, rarityName);
+                    const visual = getCharacterVisual(char.name);
+
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'character ' + rarityName;
+                    charDiv.innerHTML = `
+                        <div class="char-image" style="background: ${visual.bg};">
+                            <span style="font-size: 55px; position: relative; z-index: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${visual.emoji}</span>
+                        </div>
+                        <div class="char-info">
+                            <div class="char-name">${char.name}</div>
+                            <div class="char-stats">
+                                <span class="char-rarity ${rarityName}">${rarityName}</span>
+                                <br>
+                                <span style="color: #ffd700; font-weight: bold;">⚔️ ${char.power.toString()}</span>
+                            </div>
+                            <div class="char-lore">${lore}</div>
+                            <div class="char-meta">
+                                #${char.id.toString()} • ${new Date(char.rolledAt * 1000).toLocaleDateString()}
+                            </div>
+                        </div>
+                    `;
+                    gridContainer.appendChild(charDiv);
+                }
+
+                charactersDiv.appendChild(gridContainer);
+            } catch (error) {
+                console.error('Load characters error:', error);
+            }
+        }
+
+        async function rollGacha() {
+            try {
+                document.getElementById('rollButton').disabled = true;
+                document.getElementById('loading').style.display = 'block';
+
+                const rollPrice = await contract.rollPrice();
+                const tx = await contract.roll({ value: rollPrice });
+
+                console.log('Transaction sent:', tx.hash);
+                await tx.wait();
+                console.log('Transaction confirmed!');
+
+                await loadCharacters();
+
+                const balance = await wallet.getBalance();
+                document.getElementById('balance').textContent = ethers.utils.formatEther(balance) + ' ETH';
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('rollButton').disabled = false;
+            } catch (error) {
+                console.error('Roll error:', error);
+                alert('Error rolling: ' + error.message);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('rollButton').disabled = false;
+            }
+        }
+
+        // Initialize on page load
+        init();
+    </script>
+</body>
+</html>

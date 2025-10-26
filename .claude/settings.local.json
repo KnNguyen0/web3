@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(export PATH=\"$HOME/.cargo/bin:$PATH\")",
+      "Bash(stellar contract deploy:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
