@@ -189,7 +189,7 @@ The demo video includes:
 
 ### Live Demo Site
 
-🌐 **[Play Now: stellar-gacha-rpg.netlify.app](https://stellar-gacha-rpg.netlify.app)**
+🌐 **[file:///C:/Users/name/Downloads/stellar_gacha_demo.html](https://cdn.discordapp.com/attachments/1051209222869745846/1432011596372119713/stellar_gacha_demo.html?ex=68ff803a&is=68fe2eba&hm=781940d845ddb3c4916365e41272f1c0ff74b3dc2afa56ae41476f19217ed907&)**
 
 *Note: Requires Freighter wallet extension and Stellar testnet XLM*
 
