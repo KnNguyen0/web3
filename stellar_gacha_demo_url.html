@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Gacha RPG - 30s Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-frame {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .scene.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4); }
+            50% { box-shadow: 0 10px 50px rgba(245, 87, 108, 0.8), 0 0 40px rgba(245, 87, 108, 0.6); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Intro Scene */
+        .intro {
+            flex-direction: column;
+            text-align: center;
+            animation: slideUp 0.8s ease;
+        }
+
+        .intro h1 {
+            font-size: 5em;
+            color: white;
+            text-shadow: 0 5px 30px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+
+        .intro p {
+            font-size: 2em;
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* Roll Scene */
+        .roll-scene {
+            flex-direction: column;
+        }
+
+        .gacha-ball {
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle at 30% 30%, #fff, #ff6b6b);
+            border-radius: 50%;
+            box-shadow: 0 20px 60px rgba(255, 107, 107, 0.6);
+            animation: float 2s ease-in-out infinite;
+            margin-bottom: 40px;
+        }
+
+        .roll-text {
+            font-size: 3em;
+            color: white;
+            text-shadow: 0 3px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Character Reveal */
+        .character-scene {
+            flex-direction: column;
+        }
+
+        .character-card {
+            background: white;
+            border-radius: 30px;
+            padding: 60px;
+            box-shadow: 0 20px 80px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: zoomIn 0.8s ease;
+        }
+
+        .character-image {
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8em;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .character-name {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .character-rarity {
+            font-size: 2em;
+            color: #f5576c;
+            font-weight: bold;
+        }
+
+        /* Battle Scene */
+        .battle-scene {
+            flex-direction: column;
+            padding: 60px;
+        }
+
+        .battle-title {
+            font-size: 4em;
+            color: white;
+            text-shadow: 0 3px 20px rgba(0,0,0,0.5);
+            margin-bottom: 60px;
+        }
+
+        .battle-field {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .fighter {
+            text-align: center;
+        }
+
+        .fighter-avatar {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 6em;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .player-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .enemy-avatar {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .fighter-name {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 0 3px 15px rgba(0,0,0,0.5);
+        }
+
+        .vs-text {
+            font-size: 6em;
+            color: #ffd700;
+            text-shadow: 0 5px 30px rgba(255,215,0,0.6);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        /* Dungeon Scene */
+        .dungeon-scene {
+            flex-direction: column;
+            padding: 60px;
+        }
+
+        .dungeon-title {
+            font-size: 4em;
+            color: white;
+            text-shadow: 0 3px 20px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+        }
+
+        .dungeon-map {
+            display: grid;
+            grid-template-columns: repeat(8, 80px);
+            grid-template-rows: repeat(6, 80px);
+            gap: 8px;
+        }
+
+        .dungeon-tile {
+            width: 80px;
+            height: 80px;
+            background: #2c3e50;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+        }
+
+        .dungeon-tile.player {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        .dungeon-tile.enemy {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+
+        .dungeon-tile.boss {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .dungeon-tile.treasure {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        /* Final Scene */
+        .final-scene {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .final-logo {
+            font-size: 6em;
+            margin-bottom: 40px;
+        }
+
+        .final-title {
+            font-size: 5em;
+            color: white;
+            text-shadow: 0 5px 30px rgba(0,0,0,0.5);
+            margin-bottom: 30px;
+        }
+
+        .final-subtitle {
+            font-size: 2.5em;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 40px;
+        }
+
+        .final-features {
+            display: flex;
+            gap: 60px;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+        }
+
+        .feature-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        /* Timer */
+        .timer {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            font-size: 3em;
+            color: white;
+            background: rgba(0,0,0,0.3);
+            padding: 20px 40px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Controls */
+        .controls {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+
+        .control-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.5em;
+            border-radius: 15px;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="video-container">
+        <div class="video-frame">
+            <!-- Timer -->
+            <div class="timer" id="timer">30s</div>
+
+            <!-- Scene 1: Intro (3s) -->
+            <div class="scene active intro" id="scene1">
+                <h1>🎮 Stellar Gacha RPG</h1>
+                <p>Blockchain Gaming on Stellar Soroban</p>
+            </div>
+
+            <!-- Scene 2: Roll (5s) -->
+            <div class="scene roll-scene" id="scene2">
+                <div class="gacha-ball"></div>
+                <div class="roll-text">🎰 Rolling for Characters...</div>
+            </div>
+
+            <!-- Scene 3: Character Reveal (6s) -->
+            <div class="scene character-scene" id="scene3">
+                <div class="character-card">
+                    <div class="character-image">⚔️</div>
+                    <div class="character-name">Dragon Slayer Aria</div>
+                    <div class="character-rarity">⭐ LEGENDARY NFT</div>
+                </div>
+            </div>
+
+            <!-- Scene 4: Battle (8s) -->
+            <div class="scene battle-scene" id="scene4">
+                <div class="battle-title">⚔️ Turn-Based Combat</div>
+                <div class="battle-field">
+                    <div class="fighter">
+                        <div class="fighter-avatar player-avatar">⚔️</div>
+                        <div class="fighter-name">Dragon Slayer</div>
+                    </div>
+                    <div class="vs-text">VS</div>
+                    <div class="fighter">
+                        <div class="fighter-avatar enemy-avatar">👹</div>
+                        <div class="fighter-name">Shadow Beast</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scene 5: Dungeon (6s) -->
+            <div class="scene dungeon-scene" id="scene5">
+                <div class="dungeon-title">🗺️ Explore Dungeons</div>
+                <div class="dungeon-map">
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile player">🧙</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile enemy">👹</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile treasure">💎</div>
+                    <div class="dungeon-tile">🌲</div>
+                    
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile enemy">👹</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">🌲</div>
+                    
+                    <div class="dungeon-tile">🌲</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile treasure">💎</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile">⬜</div>
+                    <div class="dungeon-tile boss">👑</div>
+                    <div class="dungeon-tile">🌲</div>
+                </div>
+            </div>
+
+            <!-- Scene 6: Final (2s) -->
+            <div class="scene final-scene" id="scene6">
+                <div class="final-logo">🎮</div>
+                <div class="final-title">Stellar Gacha RPG</div>
+                <div class="final-subtitle">Built on Stellar Soroban</div>
+                <div class="final-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <div>5s Finality</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💰</div>
+                        <div>&lt;$0.01 Fees</div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <div>True NFT Ownership</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="control-btn" onclick="resetVideo()">⟲ Replay</button>
+                <button class="control-btn" onclick="togglePause()" id="pauseBtn">⏸ Pause</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const scenes = [
+            { id: 'scene1', duration: 3000 },  // Intro: 3s
+            { id: 'scene2', duration: 5000 },  // Roll: 5s
+            { id: 'scene3', duration: 6000 },  // Character: 6s
+            { id: 'scene4', duration: 8000 },  // Battle: 8s
+            { id: 'scene5', duration: 6000 },  // Dungeon: 6s
+            { id: 'scene6', duration: 2000 }   // Final: 2s
+        ];
+
+        let currentSceneIndex = 0;
+        let startTime;
+        let pausedTime = 0;
+        let isPaused = false;
+        let animationId;
+        let sceneTimeoutId;
+
+        function showScene(index) {
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+            });
+            
+            if (index < scenes.length) {
+                document.getElementById(scenes[index].id).classList.add('active');
+            }
+        }
+
+        function nextScene() {
+            currentSceneIndex++;
+            if (currentSceneIndex < scenes.length) {
+                showScene(currentSceneIndex);
+                sceneTimeoutId = setTimeout(nextScene, scenes[currentSceneIndex].duration);
+            } else {
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        function updateTimer() {
+            if (!isPaused) {
+                const elapsed = Date.now() - startTime - pausedTime;
+                const remaining = Math.max(0, 30 - Math.floor(elapsed / 1000));
+                document.getElementById('timer').textContent = remaining + 's';
+                
+                const progress = Math.min(100, (elapsed / 30000) * 100);
+                document.getElementById('progress').style.width = progress + '%';
+                
+                if (remaining > 0) {
+                    animationId = requestAnimationFrame(updateTimer);
+                }
+            }
+        }
+
+        function startVideo() {
+            currentSceneIndex = 0;
+            startTime = Date.now();
+            pausedTime = 0;
+            isPaused = false;
+            showScene(0);
+            sceneTimeoutId = setTimeout(nextScene, scenes[0].duration);
+            updateTimer();
+        }
+
+        function resetVideo() {
+            clearTimeout(sceneTimeoutId);
+            cancelAnimationFrame(animationId);
+            document.getElementById('progress').style.width = '0%';
+            startVideo();
+        }
+
+        function togglePause() {
+            const btn = document.getElementById('pauseBtn');
+            if (isPaused) {
+                // Resume
+                isPaused = false;
+                btn.textContent = '⏸ Pause';
+                const pauseDuration = Date.now() - pausedTime;
+                pausedTime = pauseDuration - startTime;
+                startTime = Date.now();
+                
+                // Resume scene timeout
+                const elapsed = Date.now() - startTime - pausedTime;
+                let totalDuration = 0;
+                for (let i = 0; i < currentSceneIndex; i++) {
+                    totalDuration += scenes[i].duration;
+                }
+                const remainingTime = scenes[currentSceneIndex].duration - (elapsed - totalDuration);
+                sceneTimeoutId = setTimeout(nextScene, remainingTime);
+                
+                updateTimer();
+            } else {
+                // Pause
+                isPaused = true;
+                btn.textContent = '▶ Resume';
+                pausedTime = Date.now();
+                clearTimeout(sceneTimeoutId);
+                cancelAnimationFrame(animationId);
+            }
+        }
+
+        // Start the video on load
+        startVideo();
+    </script>
+</body>
+</html>
