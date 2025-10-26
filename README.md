@@ -154,7 +154,7 @@ The contract uses pseudo-random number generation based on:
 ## Demo
 
 ### Demo Video
-*https://notebooklm.google.com/notebook/e296e43b-b4ea-4874-a3f2-d47f3e1bc15f?artifactId=fe2ab04b-49ca-4740-80e0-405c5a1b8cf5*
+*[https://notebooklm.google.com/notebook/e296e43b-b4ea-4874-a3f2-d47f3e1bc15f?artifactId=fe2ab04b-49ca-4740-80e0-405c5a1b8cf5](https://notebooklm.google.com/notebook/e296e43b-b4ea-4874-a3f2-d47f3e1bc15f?artifactId=fe2ab04b-49ca-4740-80e0-405c5a1b8cf5)*
 
 The demo video includes:
 - Connecting Freighter wallet to the game
